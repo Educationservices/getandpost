@@ -1,8 +1,7 @@
+import os
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
-
-
 current_text = ""
 
 @app.route('/text', methods=['GET', 'POST'])
@@ -14,9 +13,12 @@ def text_handler():
             return jsonify({'error': 'Missing "text" in JSON body'}), 400
         current_text = data['text']
         return jsonify({'message': 'Text updated', 'text': current_text})
-    
-    if request.method == 'GET':
-        return jsonify({'text': current_text})
+    return jsonify({'text': current_text})
+
+@app.route('/', methods=['GET'])
+def root_handler():
+    return jsonify({'message': 'Service running. Use /text endpoint.'})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))  # use PORT env var or 5000 locally
+    app.run(host='0.0.0.0', port=port)
