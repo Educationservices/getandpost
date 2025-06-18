@@ -7,7 +7,8 @@ CORS(app)
 
 current_text = ""
 server_text = None
-case_data = None  # Will hold a dict like {'text1': ..., 'text2': ...}
+case_data = None
+base64_music = None  # For storing base64 music data
 
 @app.route('/text', methods=['GET', 'POST'])
 def text_handler():
@@ -49,9 +50,22 @@ def case_handler():
         return jsonify(False)
     return jsonify(case_data)
 
+@app.route('/base64music', methods=['GET', 'POST'])
+def base64music_handler():
+    global base64_music
+    if request.method == 'POST':
+        data = request.get_json()
+        if not data or 'base64' not in data:
+            return jsonify({'error': 'Missing "base64" in JSON body'}), 400
+        base64_music = data['base64']
+        return jsonify({'message': 'Base64 music data updated'})
+    if base64_music is None:
+        return jsonify(False)
+    return jsonify({'base64': base64_music})
+
 @app.route('/', methods=['GET'])
 def root_handler():
-    return jsonify({'message': 'Service running. Use /text, /server, or /case endpoints.'})
+    return jsonify({'message': 'Service running. Use /text, /server, /case, or /base64music endpoints.'})
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
