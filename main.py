@@ -6,7 +6,8 @@ app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
 current_text = ""
-server_text = None  # Start as None to distinguish "no text set"
+server_text = None
+case_text = None
 
 @app.route('/text', methods=['GET', 'POST'])
 def text_handler():
@@ -28,14 +29,26 @@ def server_handler():
             return jsonify({'error': 'Missing "text" in JSON body'}), 400
         server_text = data['text']
         return jsonify({'message': 'Server text updated', 'text': server_text})
-    # For GET:
     if server_text is None:
         return jsonify(False)
     return jsonify({'text': server_text})
 
+@app.route('/case', methods=['GET', 'POST'])
+def case_handler():
+    global case_text
+    if request.method == 'POST':
+        data = request.get_json()
+        if not data or 'text' not in data:
+            return jsonify({'error': 'Missing "text" in JSON body'}), 400
+        case_text = data['text']
+        return jsonify({'message': 'Case text updated', 'text': case_text})
+    if case_text is None:
+        return jsonify(False)
+    return jsonify({'text': case_text})
+
 @app.route('/', methods=['GET'])
 def root_handler():
-    return jsonify({'message': 'Service running. Use /text or /server endpoints.'})
+    return jsonify({'message': 'Service running. Use /text, /server, or /case endpoints.'})
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
