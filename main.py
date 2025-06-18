@@ -3,11 +3,11 @@ from flask_cors import CORS
 import os
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app)
 
 current_text = ""
 server_text = None
-case_text = None
+case_data = None  # Will hold a dict like {'text1': ..., 'text2': ...}
 
 @app.route('/text', methods=['GET', 'POST'])
 def text_handler():
@@ -35,16 +35,19 @@ def server_handler():
 
 @app.route('/case', methods=['GET', 'POST'])
 def case_handler():
-    global case_text
+    global case_data
     if request.method == 'POST':
         data = request.get_json()
-        if not data or 'text' not in data:
-            return jsonify({'error': 'Missing "text" in JSON body'}), 400
-        case_text = data['text']
-        return jsonify({'message': 'Case text updated', 'text': case_text})
-    if case_text is None:
+        if not data or 'text1' not in data or 'text2' not in data:
+            return jsonify({'error': 'Missing "text1" or "text2" in JSON body'}), 400
+        case_data = {
+            'text1': data['text1'],
+            'text2': data['text2']
+        }
+        return jsonify({'message': 'Case data updated', 'data': case_data})
+    if case_data is None:
         return jsonify(False)
-    return jsonify({'text': case_text})
+    return jsonify(case_data)
 
 @app.route('/', methods=['GET'])
 def root_handler():
