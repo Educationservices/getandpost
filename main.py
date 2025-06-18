@@ -8,7 +8,8 @@ CORS(app)
 current_text = ""
 server_text = None
 case_data = None
-base64_music = None  # For storing base64 music data
+base64_music = None
+flag_value = None  # Stores True/False flag
 
 @app.route('/text', methods=['GET', 'POST'])
 def text_handler():
@@ -63,9 +64,24 @@ def base64music_handler():
         return jsonify(False)
     return jsonify({'base64': base64_music})
 
+@app.route('/flag', methods=['GET', 'POST'])
+def flag_handler():
+    global flag_value
+    if request.method == 'POST':
+        data = request.get_json()
+        if not data or 'flag' not in data:
+            return jsonify({'error': 'Missing "flag" in JSON body'}), 400
+        if not isinstance(data['flag'], bool):
+            return jsonify({'error': '"flag" must be true or false'}), 400
+        flag_value = data['flag']
+        return jsonify({'message': 'Flag updated', 'flag': flag_value})
+    if flag_value is None:
+        return jsonify(False)
+    return jsonify({'flag': flag_value})
+
 @app.route('/', methods=['GET'])
 def root_handler():
-    return jsonify({'message': 'Service running. Use /text, /server, /case, or /base64music endpoints.'})
+    return jsonify({'message': 'Service running. Use /text, /server, /case, /base64music, or /flag endpoints.'})
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
